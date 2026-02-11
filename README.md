@@ -38,9 +38,13 @@ DocumentRoot /opt/online/app
 # Route requests to `/api/` to Gunicorn
 <Location /api/>
     ProxyPreserveHost On
-    ProxyPass [http://127.0.0.1:5000/api/](http://127.0.0.1:5000/api/)
-    ProxyPassReverse [http://127.0.0.1:5000/api/](http://127.0.0.1:5000/api/)
+    ProxyPass http://127.0.0.1:5000/api/
+    ProxyPassReverse http://127.0.0.1:5000/api/
 </Location>
+````
+Now enable proxy module and restart apache
+````bash
+sudo a2enmod proxy proxy_http
 ````
 ### Setup your app location, I use /opt/online
 ```bash
