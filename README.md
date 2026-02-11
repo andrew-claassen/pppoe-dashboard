@@ -46,12 +46,13 @@ Now enable proxy module and restart apache
 ````bash
 sudo a2enmod proxy proxy_http
 ````
-### 3. Setup your app location, I use /opt/online
+### 3. Setup your app location and install python modules, I use /opt/online
 ```bash
 cd /opt/online
 python3 -m venv /opt/online/venv
 source venv/bin/activate
 pip3 install --upgrade pip
+pip3 install -r requirements.txt
 ````
 
 ### 4. Edit the .env file with your router dns name/ip and login details
