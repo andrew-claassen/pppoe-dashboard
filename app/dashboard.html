@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PPPoE Subscribers</title>
+<link rel="stylesheet" href="static/style.css">
+
+<style>
+  th.sortable { cursor: pointer; }
+  th.sorted.asc::after   { content:" ▲"; }
+  th.sorted.desc::after  { content:" ▼"; }
+
+  #pagination { margin-top: 1rem; }
+  button.page-btn[disabled] { opacity:0.5; cursor:not-allowed; }
+</style>
+</head>
+
+<body>
+<h1>PPPoe Subscriber Dashboard</h1>
+<div id="header">
+  <div id="summary">
+    <div class="summary-card">
+      <div class="summary-label">Total Sessions</div>
+      <div class="summary-value" id="totalSessions">-</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">By Router</div>
+      <div id="routerSummary"></div>
+    </div>
+  </div>
+</div>
+
+<div id="filters">
+  <input type="text" id="routerFilter" placeholder="Router IP/Name">
+  <input type="text" id="userFilter"   placeholder="Username">
+  <input type="text" id="ipFilter"     placeholder="IP address">
+  <button onclick="loadData()">Search</button>
+</div>
+
+<table id="results">
+  <thead>
+    <tr>
+      <th data-col="timestamp" class="sortable">Timestamp</th>
+      <th data-col="router"   class="sortable">Router</th>
+      <th data-col="username" class="sortable">User</th>
+      <th data-col="interface"class="sortable">Interface</th>
+      <th data-col="framed_ip" class="sortable">IP</th>
+      <th data-col="mac_address" class="sortable">MAC</th>
+      <th data-col="download_speed" class="sortable">Down(kbps)</th>
+      <th data-col="upload_speed"   class="sortable">Up(kbps)</th>
+      <th data-col="up_time"        class="sortable">Uptime</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<div id="pagination">
+  <button class="page-btn" id="prevBtn" onclick="changePage(-1)">← Prev</button>
+  <span id="pageInfo"></span>
+  <button class="page-btn" id="nextBtn" onclick="changePage(1)">Next →</button>
+</div>
+
+<script>
+let currentPage   = 1;
+const limitPerPage = 500;
+let currentSort   = { col: null, asc: true };
+
+// ------------------------------------------------------------------
+// Fetch & render data
+// ------------------------------------------------------------------
+async function loadData() {
+  //start from first page on each search
+  currentPage = 1;
+  const router = document.getElementById('routerFilter').value.trim();
+  const user   = document.getElementById('userFilter').value.trim();
+  const ip     = document.getElementById('ipFilter').value.trim();
+
+  let url = '/api/subscribers';
+  const params = new URLSearchParams();
+  if (router) params.append('router', router);
+  if (user)   params.append('username', user);
+  if (ip)     params.append('framed_ip', ip);
+
+  // Pagination
+  params.append('page', currentPage);
+  params.append('limit', limitPerPage);
+
+  url += '?' + params.toString();
+
+  const res  = await fetch(url);
+  const data = await res.json();
+  renderTable(data);
+}
+
+// ------------------------------------------------------------------
+// Render table rows & pagination controls
+// ------------------------------------------------------------------
+function renderTable(rows) {
+  const tbody = document.querySelector('#results tbody');
+  tbody.innerHTML = '';
+
+  rows.forEach(row => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${row.timestamp}</td>
+      <td>${row.router}</td>
+      <td>${row.username}</td>
+      <td>${row.interface}</td>
+      <td>${row.framed_ip}</td>
+      <td>${row.mac_address}</td>
+      <td>${row.download_speed}</td>
+      <td>${row.upload_speed}</td>
+      <td>${row.up_time}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  attachSortHandlers();          // enable column sorting
+  updatePaginationControls(rows); // show correct button state & page number
+}
+
+// ------------------------------------------------------------------
+// Sorting logic
+// ------------------------------------------------------------------
+function sortTable(colIndex, type) {
+  const tbody = document.querySelector('#results tbody');
+  const rows  = Array.from(tbody.rows);
+
+  rows.sort((a, b) => {
+    let valA = a.cells[colIndex].textContent.trim();
+    let valB = b.cells[colIndex].textContent.trim();
+
+    if (type === 'number') {
+      return currentSort.asc ? valA - valB : valB - valA;
+    }
+    if (type === 'date') {
+      const tsA = new Date(valA).getTime();
+      const tsB = new Date(valB).getTime();
+      return currentSort.asc ? tsA - tsB : tsB - tsA;
+    }
+
+    // string comparison
+    valA = valA.toLowerCase();
+    valB = valB.toLowerCase();
+    if (valA < valB) return currentSort.asc ? -1 : 1;
+    if (valA > valB) return currentSort.asc ?  1 : -1;
+    return 0;
+  });
+
+  rows.forEach(row => tbody.appendChild(row));
+}
+
+function attachSortHandlers() {
+  const ths = document.querySelectorAll('#results th.sortable');
+  ths.forEach(th => {
+    th.onclick = () => {
+      const colName   = th.dataset.col;
+      const colIndex  = Array.from(th.parentNode.children).indexOf(th);
+
+      // Toggle direction if same column
+      if (currentSort.col === colName) {
+        currentSort.asc = !currentSort.asc;
+      } else {
+        currentSort.col = colName;
+        currentSort.asc = true;
+      }
+
+      ths.forEach(t => t.classList.remove('sorted', 'asc', 'desc'));
+      th.classList.add('sorted', currentSort.asc ? 'asc' : 'desc');
+
+      let type = 'string';
+      if (colName === 'timestamp')          type = 'date';
+      else if (['download_speed','upload_speed'].includes(colName))
+        type = 'number';
+
+      sortTable(colIndex, type);
+    };
+  });
+}
+
+// ------------------------------------------------------------------
+// Pagination helpers
+// ------------------------------------------------------------------
+function changePage(delta) {
+  const newPage = currentPage + delta;
+  if (newPage < 1) return;
+  currentPage = newPage;
+  loadData();
+}
+
+function updatePaginationControls(rows) {
+  const prevBtn   = document.getElementById('prevBtn');
+  const nextBtn   = document.getElementById('nextBtn');
+  const pageInfo  = document.getElementById('pageInfo');
+
+  prevBtn.disabled = currentPage <= 1;
+  nextBtn.disabled = rows.length < limitPerPage;
+
+  pageInfo.textContent = `Page ${currentPage}`;
+}
+
+// ------------------------------------------------------------------
+// Load and display summary
+// ------------------------------------------------------------------
+async function loadSummary() {
+  try {
+    const res = await fetch('/api/summary');
+    const data = await res.json();
+    
+    document.getElementById('totalSessions').textContent = data.total;
+    
+    const routerDiv = document.getElementById('routerSummary');
+    routerDiv.innerHTML = '';
+    
+    data.per_router.forEach(router => {
+      const stat = document.createElement('div');
+      stat.className = 'router-stat';
+      stat.innerHTML = `<span class="router-name">${router.router}</span>: ${router.count}`;
+      routerDiv.appendChild(stat);
+    });
+  } catch (error) {
+    console.error('Error loading summary:', error);
+  }
+}
+
+// ------------------------------------------------------------------
+// Initial load
+// ------------------------------------------------------------------
+loadData();
+loadSummary();
+</script>
+</body>
+</html>
