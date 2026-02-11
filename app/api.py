@@ -25,7 +25,7 @@ def close_db(error):
 #   - router    : filter by router IP/name
 #   - username  : filter by subscriber name
 #   - framed_ip : filter by IP
-#   - limit     : number of rows to return (default 500)
+#   - limit     : number of rows to return (default 50)
 # ------------------------------------------------------------------
 @app.route('/api/subscribers', methods=['GET'])
 def get_subscribers():
@@ -90,7 +90,7 @@ def get_summary():
         'per_router': per_router
     })
 
-# Optional: health‑check endpoint
+# health‑check endpoint
 @app.route('/api/health', methods=['GET'])
 def health():
     return "OK", 200
