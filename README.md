@@ -92,3 +92,13 @@ replace <host> with the dns/ip of this box, you should see data
 http://<host>/online/dashboard.html
 ````
 
+### 8. Housekeeping
+Run this in the background to clean stale data ( it runs every hour ) 
+```bash
+python3 housekeeping.py
+
+INFO:__main__:Housekeeping service started
+INFO:__main__:=== STARTING HOUSEKEEPING ===
+INFO:__main__:Cleaning data older than 2026-02-11 19:13:42
+INFO:__main__:Deleted 58 old records from database````
+
