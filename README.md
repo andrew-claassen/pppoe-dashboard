@@ -12,6 +12,7 @@ I thought there may be a use for this for other people in a similar situation, s
 
 ### Future Goals
 - Extend support to other BNGs (specifically Mikrotik for smaller ISP environments).
+- Package as a docker container
 
 ---
 
