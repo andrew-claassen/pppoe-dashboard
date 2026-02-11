@@ -46,7 +46,7 @@ Now enable proxy module and restart apache
 ````bash
 sudo a2enmod proxy proxy_http
 ````
-### Setup your app location, I use /opt/online
+### 3. Setup your app location, I use /opt/online
 ```bash
 cd /opt/online
 python3 -m venv /opt/online/venv
@@ -54,7 +54,7 @@ source venv/bin/activate
 pip3 install --upgrade pip
 ````
 
-### Edit the .env file with your router dns name/ip and login details
+### 4. Edit the .env file with your router dns name/ip and login details
 
 Now start the collector it should show some output like so:
 ```bash
@@ -72,20 +72,20 @@ python3 collect_pppoe_stats.py
 
 This will poll the devices every 5mins to run it in the backgroup add & at the end
 
-### Open a new terminal and check there is data in the db
+### 5. Open a new terminal and check there is data in the db
 ```bash
 cd /opt/online/db
 python3 sql-query1.py
 ````
 You should see around 100 results of data if not check there are no errors running the collector script
 
-### Start the API
+### 6. Start the API
 ```bash
 cd /opt/online/app
 gunicorn -w 4 --bind 127.0.0.1:5000 api:app &
 ````
 
-### Access dashboard 
+### 7. Access dashboard 
 replace <host> with the dns/ip of this box, you should see data
 ```bash
 http://<host>/online/dashboard.html
