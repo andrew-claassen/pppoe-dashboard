@@ -95,7 +95,7 @@ http://<host>/online/dashboard.html
 ### 8. Housekeeping
 Run this in the background to clean stale data ( it runs every hour ) 
 ```bash
-python3 housekeeping.py
+python3 housekeeping.py &
 
 INFO:__main__:Housekeeping service started
 INFO:__main__:=== STARTING HOUSEKEEPING ===
