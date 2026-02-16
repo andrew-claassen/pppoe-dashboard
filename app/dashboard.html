@@ -62,15 +62,13 @@
 
 <script>
 let currentPage   = 1;
-const limitPerPage = 500;
+const limitPerPage = 100;
 let currentSort   = { col: null, asc: true };
 
-// ------------------------------------------------------------------
-// Fetch & render data
-// ------------------------------------------------------------------
-async function loadData() {
+// Fetch and render data
+async function loadData(resetPage = true) {
   //start from first page on each search
-  currentPage = 1;
+  if (resetPage) currentPage = 1;
   const router = document.getElementById('routerFilter').value.trim();
   const user   = document.getElementById('userFilter').value.trim();
   const ip     = document.getElementById('ipFilter').value.trim();
@@ -92,9 +90,7 @@ async function loadData() {
   renderTable(data);
 }
 
-// ------------------------------------------------------------------
-// Render table rows & pagination controls
-// ------------------------------------------------------------------
+// Render table rows and pagination controls
 function renderTable(rows) {
   const tbody = document.querySelector('#results tbody');
   tbody.innerHTML = '';
@@ -115,12 +111,10 @@ function renderTable(rows) {
   });
 
   attachSortHandlers();          // enable column sorting
-  updatePaginationControls(rows); // show correct button state & page number
+  updatePaginationControls(rows); // show correct button state and page number
 }
 
-// ------------------------------------------------------------------
 // Sorting logic
-// ------------------------------------------------------------------
 function sortTable(colIndex, type) {
   const tbody = document.querySelector('#results tbody');
   const rows  = Array.from(tbody.rows);
@@ -177,14 +171,12 @@ function attachSortHandlers() {
   });
 }
 
-// ------------------------------------------------------------------
 // Pagination helpers
-// ------------------------------------------------------------------
 function changePage(delta) {
   const newPage = currentPage + delta;
   if (newPage < 1) return;
   currentPage = newPage;
-  loadData();
+  loadData(false);  // false = don't reset page
 }
 
 function updatePaginationControls(rows) {
@@ -198,9 +190,7 @@ function updatePaginationControls(rows) {
   pageInfo.textContent = `Page ${currentPage}`;
 }
 
-// ------------------------------------------------------------------
 // Load and display summary
-// ------------------------------------------------------------------
 async function loadSummary() {
   try {
     const res = await fetch('/api/summary');
@@ -222,9 +212,7 @@ async function loadSummary() {
   }
 }
 
-// ------------------------------------------------------------------
 // Initial load
-// ------------------------------------------------------------------
 loadData();
 loadSummary();
 </script>

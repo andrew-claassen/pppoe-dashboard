@@ -25,7 +25,7 @@ def close_db(error):
 #   - router    : filter by router IP/name
 #   - username  : filter by subscriber name
 #   - framed_ip : filter by IP
-#   - limit     : number of rows to return (default 50)
+#   - limit     : number of rows to return (default 100)
 # ------------------------------------------------------------------
 @app.route('/api/subscribers', methods=['GET'])
 def get_subscribers():
@@ -55,7 +55,7 @@ def get_subscribers():
         sql += " WHERE " + " AND ".join(filters)
 
     # Pagination
-    limit  = request.args.get('limit', 50, type=int)
+    limit  = request.args.get('limit', 100, type=int)
     page   = request.args.get('page', 1, type=int)
     offset = (page - 1) * limit
 
@@ -90,7 +90,7 @@ def get_summary():
         'per_router': per_router
     })
 
-# health‑check endpoint
+# Optional: health‑check endpoint
 @app.route('/api/health', methods=['GET'])
 def health():
     return "OK", 200
