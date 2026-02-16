@@ -3,10 +3,10 @@
 A lightweight dashboard designed to visualize connected subscribers (L2TP, PPPoE, and PPPoE over L2TP) for network environments where RADIUS API access is unavailable.
 
 ## Background
-I work with network gear daily rather than writing code, I built this tool to bridge a gap: our backend billing system changed to a RADIUS setup without API access or any dashboard to view online subscibers. 
+I work with network gear daily and writing code is something I like todo in my spare time, I built this tool to bridge a gap: our backend billing system changed to a RADIUS setup without API access or any dashboard to view online subscibers. 
 This dashboard allows for visibility into subscriber connectivity with a 5 minute delay, show collection time, bng name, pppoe username, virtual interface, mac address, up speed, down speed, and session time.
 
-Currently, this is tested and running on **2x Cisco ASR1001-X** routers, handling approximately **5,000 subscribers**. A full data collection run typically completes in under **30 seconds**.
+Currently, this is tested and running on **2x Cisco ASR1001-X** routers, handling approximately **4,500 subscribers**. A full data collection run typically completes in around **20 seconds**.
 
 I thought there may be a use for this for other people in a similar situation, so here it is.
 
